@@ -28,7 +28,6 @@ export default function CreateSubjectPage() {
     e.preventDefault();
     setError("");
     setSuccess(false);
-
     if (form.subjectName.length < 5) {
       setError("Subject name must be at least 5 characters.");
       return;
@@ -37,7 +36,6 @@ export default function CreateSubjectPage() {
       setError("Please select a mentor.");
       return;
     }
-
     setLoading(true);
     try {
       const token = await getToken({ template: "skillmentor-auth" });
@@ -50,7 +48,7 @@ export default function CreateSubjectPage() {
       });
       setSuccess(true);
       setForm({ subjectName: "", description: "", courseImageUrl: "", mentorId: "" });
-    } catch (err) {
+    } catch {
       setError("Failed to create subject. Please try again.");
     } finally {
       setLoading(false);
@@ -61,9 +59,7 @@ export default function CreateSubjectPage() {
     <div className="max-w-xl">
       <h1 className="text-3xl font-bold mb-8">Create Subject</h1>
       <Card>
-        <CardHeader>
-          <CardTitle>New Subject</CardTitle>
-        </CardHeader>
+        <CardHeader><CardTitle>New Subject</CardTitle></CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
@@ -112,10 +108,8 @@ export default function CreateSubjectPage() {
                 ))}
               </select>
             </div>
-
             {error && <p className="text-sm text-destructive">{error}</p>}
             {success && <p className="text-sm text-green-600">Subject created successfully!</p>}
-
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? "Creating..." : "Create Subject"}
             </Button>

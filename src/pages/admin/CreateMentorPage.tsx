@@ -33,12 +33,10 @@ export default function CreateMentorPage() {
     e.preventDefault();
     setError("");
     setSuccess(false);
-
     if (!form.firstName || !form.lastName || !form.email) {
       setError("First name, last name and email are required.");
       return;
     }
-
     setLoading(true);
     try {
       const token = await getToken({ template: "skillmentor-auth" });
@@ -57,15 +55,20 @@ export default function CreateMentorPage() {
         positiveReviews: "", totalEnrollments: "",
         isCertified: false, startYear: "",
       });
-    } catch (err) {
+    } catch {
       setError("Failed to create mentor. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
-  const Field = ({ id, label, required = false, type = "text" }: {
-    id: keyof typeof form; label: string; required?: boolean; type?: string;
+  const Field = ({
+    id, label, required = false, type = "text"
+  }: {
+    id: keyof typeof form;
+    label: string;
+    required?: boolean;
+    type?: string;
   }) => (
     <div className="space-y-2">
       <Label htmlFor={id}>{label}{required && " *"}</Label>
@@ -120,10 +123,8 @@ export default function CreateMentorPage() {
               />
               <Label htmlFor="isCertified">Is Certified Teacher</Label>
             </div>
-
             {error && <p className="text-sm text-destructive">{error}</p>}
             {success && <p className="text-sm text-green-600">Mentor created successfully!</p>}
-
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? "Creating..." : "Create Mentor"}
             </Button>

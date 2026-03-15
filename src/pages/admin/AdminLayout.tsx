@@ -22,7 +22,11 @@ export default function AdminLayout() {
     }
   }, [isLoaded, isSignedIn, user, navigate]);
 
-  if (!isLoaded) return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
+  if (!isLoaded) return (
+    <div className="flex items-center justify-center min-h-screen">
+      Loading...
+    </div>
+  );
 
   const navItems = [
     { label: "Manage Bookings", href: "/admin/bookings", icon: LayoutDashboard },
@@ -32,7 +36,6 @@ export default function AdminLayout() {
 
   return (
     <div className="flex min-h-screen bg-background">
-      {/* Sidebar */}
       <aside className="w-64 bg-black text-white flex flex-col">
         <div className="p-6 border-b border-white/10">
           <Link to="/" className="flex items-center space-x-2">
@@ -66,8 +69,6 @@ export default function AdminLayout() {
           </Link>
         </div>
       </aside>
-
-      {/* Main Content */}
       <main className="flex-1 p-8 overflow-auto">
         <Outlet />
       </main>

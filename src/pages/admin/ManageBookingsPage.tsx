@@ -2,7 +2,11 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@clerk/clerk-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { adminGetAllSessions, adminUpdateSessionStatus, adminUpdateMeetingLink } from "@/lib/api";
+import {
+  adminGetAllSessions,
+  adminUpdateSessionStatus,
+  adminUpdateMeetingLink,
+} from "@/lib/api";
 
 interface AdminSession {
   id: number;
@@ -17,9 +21,10 @@ export default function ManageBookingsPage() {
   const { getToken } = useAuth();
   const [sessions, setSessions] = useState<AdminSession[]>([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
-  const [meetingLinkInput, setMeetingLinkInput] = useState<{ [id: number]: string }>({});
+  const [meetingLinkInput, setMeetingLinkInput] = useState<{
+    [id: number]: string;
+  }>({});
 
   const fetchSessions = async () => {
     const token = await getToken({ template: "skillmentor-auth" });
@@ -77,14 +82,7 @@ export default function ManageBookingsPage() {
   return (
     <div>
       <h1 className="text-3xl font-bold mb-8">Manage Bookings</h1>
-
       <div className="flex gap-4 mb-6">
-        <Input
-          placeholder="Search..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="max-w-xs"
-        />
         <select
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
@@ -140,7 +138,10 @@ export default function ManageBookingsPage() {
                         placeholder="https://meet.google.com/..."
                         value={meetingLinkInput[session.id] ?? session.meetingLink ?? ""}
                         onChange={(e) =>
-                          setMeetingLinkInput({ ...meetingLinkInput, [session.id]: e.target.value })
+                          setMeetingLinkInput({
+                            ...meetingLinkInput,
+                            [session.id]: e.target.value,
+                          })
                         }
                         className="h-7 text-xs w-48"
                       />

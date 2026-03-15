@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router";
 import Layout from "@/components/Layout";
 import HomePage from "@/pages/HomePage";
 import LoginPage from "@/pages/LoginPage";
@@ -8,7 +8,15 @@ import AdminLayout from "@/pages/admin/AdminLayout";
 import CreateSubjectPage from "@/pages/admin/CreateSubjectPage";
 import CreateMentorPage from "@/pages/admin/CreateMentorPage";
 import ManageBookingsPage from "@/pages/admin/ManageBookingsPage";
-import { SignedIn, SignedOut } from "@clerk/clerk-react";
+import { SignedIn, SignedOut, useUser } from "@clerk/clerk-react";
+
+function RoleRedirect() {
+  const { user, isLoaded } = useUser();
+  if (!isLoaded) return null;
+  const roles = user?.publicMetadata?.roles as string[] | undefined;
+  if (roles?.includes("admin")) return <Navigate to="/admin/bookings" />;
+  return <Navigate to="/dashboard" />;
+}
 
 function App() {
   return (
@@ -35,10 +43,17 @@ function App() {
           }
         />
         <Route path="/admin" element={<AdminLayout />}>
-          <Route path="subjects/create" element={<CreateSubjectPage />} />
-          <Route path="mentors/create" element={<CreateMentorPage />} />
+          <Route index element={<Navigate to="/admin/bookings" />} />
           <Route path="bookings" element={<ManageBookingsPage />} />
+          <Route path="mentors/create" element={<CreateMentorPage />} />
+          <Route path="subjects/create" element={<CreateSubjectPage />} />
         </Route>
+        <Route
+          path="/redirect"
+          element={
+            <SignedIn><RoleRedirect /></SignedIn>
+          }
+        />
         <Route path="*" element={<Layout><LoginPage /></Layout>} />
       </Routes>
     </BrowserRouter>
