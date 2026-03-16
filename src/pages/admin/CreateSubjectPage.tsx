@@ -109,7 +109,9 @@ export default function CreateSubjectPage() {
               </select>
             </div>
             {error && <p className="text-sm text-destructive">{error}</p>}
-            {success && <p className="text-sm text-green-600">Subject created successfully!</p>}
+            {success && (
+              <p className="text-sm text-green-600">Subject created successfully!</p>
+            )}
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? "Creating..." : "Create Subject"}
             </Button>

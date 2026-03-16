@@ -63,7 +63,7 @@ export default function CreateMentorPage() {
   };
 
   const Field = ({
-    id, label, required = false, type = "text"
+    id, label, required = false, type = "text",
   }: {
     id: keyof typeof form;
     label: string;
@@ -124,7 +124,9 @@ export default function CreateMentorPage() {
               <Label htmlFor="isCertified">Is Certified Teacher</Label>
             </div>
             {error && <p className="text-sm text-destructive">{error}</p>}
-            {success && <p className="text-sm text-green-600">Mentor created successfully!</p>}
+            {success && (
+              <p className="text-sm text-green-600">Mentor created successfully!</p>
+            )}
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? "Creating..." : "Create Mentor"}
             </Button>

@@ -10,6 +10,10 @@ import {
 
 interface AdminSession {
   id: number;
+  studentName: string;
+  studentEmail: string;
+  mentorName: string;
+  subjectName: string;
   sessionAt: string;
   durationMinutes: number;
   sessionStatus: string;
@@ -21,6 +25,7 @@ export default function ManageBookingsPage() {
   const { getToken } = useAuth();
   const [sessions, setSessions] = useState<AdminSession[]>([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
   const [meetingLinkInput, setMeetingLinkInput] = useState<{
     [id: number]: string;
@@ -68,6 +73,13 @@ export default function ManageBookingsPage() {
 
   const filtered = sessions.filter((s) => {
     if (filter !== "all" && s.paymentStatus !== filter) return false;
+    if (search) {
+      const q = search.toLowerCase();
+      return (
+        s.studentName?.toLowerCase().includes(q) ||
+        s.mentorName?.toLowerCase().includes(q)
+      );
+    }
     return true;
   });
 
@@ -83,6 +95,12 @@ export default function ManageBookingsPage() {
     <div>
       <h1 className="text-3xl font-bold mb-8">Manage Bookings</h1>
       <div className="flex gap-4 mb-6">
+        <Input
+          placeholder="Search by student or mentor..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="max-w-xs"
+        />
         <select
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
@@ -106,7 +124,10 @@ export default function ManageBookingsPage() {
             <thead className="bg-muted">
               <tr>
                 <th className="px-4 py-3 text-left">ID</th>
-                <th className="px-4 py-3 text-left">Session Date</th>
+                <th className="px-4 py-3 text-left">Student</th>
+                <th className="px-4 py-3 text-left">Mentor</th>
+                <th className="px-4 py-3 text-left">Subject</th>
+                <th className="px-4 py-3 text-left">Date</th>
                 <th className="px-4 py-3 text-left">Duration</th>
                 <th className="px-4 py-3 text-left">Payment</th>
                 <th className="px-4 py-3 text-left">Status</th>
@@ -118,6 +139,9 @@ export default function ManageBookingsPage() {
               {filtered.map((session) => (
                 <tr key={session.id} className="bg-background hover:bg-muted/50">
                   <td className="px-4 py-3">{session.id}</td>
+                  <td className="px-4 py-3">{session.studentName ?? "—"}</td>
+                  <td className="px-4 py-3">{session.mentorName ?? "—"}</td>
+                  <td className="px-4 py-3">{session.subjectName ?? "—"}</td>
                   <td className="px-4 py-3">
                     {new Date(session.sessionAt).toLocaleDateString()}
                   </td>

@@ -16,12 +16,10 @@ async function fetchWithAuth(
       ...options.headers,
     },
   });
-
   if (!res.ok) {
     const error = await res.json().catch(() => ({ message: "Request failed" }));
     throw new Error(error.message || `HTTP ${res.status}`);
   }
-
   return res;
 }
 
@@ -68,10 +66,14 @@ export async function adminUpdateSessionStatus(
   status?: string,
   sessionStatus?: string,
 ) {
-  const res = await fetchWithAuth(`/api/v1/admin/sessions/${id}/status`, token, {
-    method: "PATCH",
-    body: JSON.stringify({ status, sessionStatus }),
-  });
+  const res = await fetchWithAuth(
+    `/api/v1/admin/sessions/${id}/status`,
+    token,
+    {
+      method: "PATCH",
+      body: JSON.stringify({ status, sessionStatus }),
+    },
+  );
   return res.json();
 }
 

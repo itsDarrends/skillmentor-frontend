@@ -50,9 +50,7 @@ function App() {
         </Route>
         <Route
           path="/redirect"
-          element={
-            <SignedIn><RoleRedirect /></SignedIn>
-          }
+          element={<SignedIn><RoleRedirect /></SignedIn>}
         />
         <Route path="*" element={<Layout><LoginPage /></Layout>} />
       </Routes>
