@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@clerk/clerk-react";
+import { useNavigate } from "react-router";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,6 +10,7 @@ import type { Mentor } from "@/types";
 
 export default function CreateSubjectPage() {
   const { getToken } = useAuth();
+  const navigate = useNavigate();
   const [mentors, setMentors] = useState<Mentor[]>([]);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -48,6 +50,7 @@ export default function CreateSubjectPage() {
       });
       setSuccess(true);
       setForm({ subjectName: "", description: "", courseImageUrl: "", mentorId: "" });
+      setTimeout(() => navigate("/admin/bookings"), 1500);
     } catch {
       setError("Failed to create subject. Please try again.");
     } finally {
@@ -110,7 +113,9 @@ export default function CreateSubjectPage() {
             </div>
             {error && <p className="text-sm text-destructive">{error}</p>}
             {success && (
-              <p className="text-sm text-green-600">Subject created successfully!</p>
+              <p className="text-sm text-green-600">
+                Subject created successfully! Redirecting...
+              </p>
             )}
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? "Creating..." : "Create Subject"}
