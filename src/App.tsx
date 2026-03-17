@@ -7,16 +7,20 @@ import PaymentPage from "@/pages/PaymentPage";
 import AboutPage from "@/pages/AboutPage";
 import ResourcesPage from "@/pages/ResourcesPage";
 import AdminLayout from "@/pages/admin/AdminLayout";
+import StatsPage from "@/pages/admin/StatsPage";
 import CreateSubjectPage from "@/pages/admin/CreateSubjectPage";
 import CreateMentorPage from "@/pages/admin/CreateMentorPage";
 import ManageBookingsPage from "@/pages/admin/ManageBookingsPage";
+import ManageMentorsPage from "@/pages/admin/ManageMentorsPage";
+import ManageSubjectsPage from "@/pages/admin/ManageSubjectsPage";
+import ManageStudentsPage from "@/pages/admin/ManageStudentsPage";
 import { SignedIn, SignedOut, useUser } from "@clerk/clerk-react";
 
 function RoleRedirect() {
   const { user, isLoaded } = useUser();
   if (!isLoaded) return null;
   const roles = user?.publicMetadata?.roles as string[] | undefined;
-  if (roles?.includes("ADMIN")) return <Navigate to="/admin/bookings" />;
+  if (roles?.includes("ADMIN")) return <Navigate to="/admin/stats" />;
   return <Navigate to="/dashboard" />;
 }
 
@@ -47,10 +51,14 @@ function App() {
           }
         />
         <Route path="/admin" element={<AdminLayout />}>
-          <Route index element={<Navigate to="/admin/bookings" />} />
+          <Route index element={<Navigate to="/admin/stats" />} />
+          <Route path="stats" element={<StatsPage />} />
           <Route path="bookings" element={<ManageBookingsPage />} />
+          <Route path="mentors" element={<ManageMentorsPage />} />
           <Route path="mentors/create" element={<CreateMentorPage />} />
+          <Route path="subjects" element={<ManageSubjectsPage />} />
           <Route path="subjects/create" element={<CreateSubjectPage />} />
+          <Route path="students" element={<ManageStudentsPage />} />
         </Route>
         <Route
           path="/redirect"

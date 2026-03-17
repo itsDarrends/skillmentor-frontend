@@ -1,7 +1,7 @@
 import { useAuth, useUser } from "@clerk/clerk-react";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Link, Outlet, useNavigate, useLocation } from "react-router";
-import { LayoutDashboard, Users, BookOpen, Menu } from "lucide-react";
+import { LayoutDashboard, Users, BookOpen, BarChart3, GraduationCap, Menu } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export default function AdminLayout() {
@@ -9,32 +9,34 @@ export default function AdminLayout() {
   const { user, isLoaded: userLoaded } = useUser();
   const navigate = useNavigate();
   const location = useLocation();
-  const [checked, setChecked] = useState(false);
 
   useEffect(() => {
     if (!authLoaded || !userLoaded) return;
-    if (!isSignedIn) {
-      navigate("/login");
-      return;
-    }
-    const roles = user?.publicMetadata?.roles as string[] | undefined;
-    if (!roles?.includes("ADMIN")) {
-      navigate("/dashboard");
-      return;
-    }
-    setChecked(true);
+    if (!isSignedIn) { navigate("/login"); return; }
+    if (!user) { navigate("/dashboard"); return; }
+    const roles = user.publicMetadata?.roles as string[] | undefined;
+    if (!roles?.includes("ADMIN")) { navigate("/dashboard"); return; }
   }, [authLoaded, userLoaded, isSignedIn, user, navigate]);
 
-  if (!checked) return (
+  if (!authLoaded || !userLoaded) return (
+    <div className="flex items-center justify-center min-h-screen">
+      <p className="text-muted-foreground">Loading...</p>
+    </div>
+  );
+
+  const roles = user?.publicMetadata?.roles as string[] | undefined;
+  if (!isSignedIn || !roles?.includes("ADMIN")) return (
     <div className="flex items-center justify-center min-h-screen">
       <p className="text-muted-foreground">Loading...</p>
     </div>
   );
 
   const navItems = [
+    { label: "Statistics", href: "/admin/stats", icon: BarChart3 },
     { label: "Manage Bookings", href: "/admin/bookings", icon: LayoutDashboard },
-    { label: "Create Mentor", href: "/admin/mentors/create", icon: Users },
-    { label: "Create Subject", href: "/admin/subjects/create", icon: BookOpen },
+    { label: "Manage Mentors", href: "/admin/mentors", icon: Users },
+    { label: "Manage Subjects", href: "/admin/subjects", icon: BookOpen },
+    { label: "Manage Students", href: "/admin/students", icon: GraduationCap },
   ];
 
   return (
@@ -63,11 +65,14 @@ export default function AdminLayout() {
             </Link>
           ))}
         </nav>
-        <div className="p-4 border-t border-white/10">
-          <Link
-            to="/dashboard"
-            className="flex items-center space-x-2 text-white/60 hover:text-white text-sm transition-colors"
-          >
+        <div className="p-4 border-t border-white/10 space-y-2">
+          <Link to="/admin/mentors/create" className="flex items-center space-x-2 text-white/60 hover:text-white text-sm transition-colors">
+            + Create Mentor
+          </Link>
+          <Link to="/admin/subjects/create" className="flex items-center space-x-2 text-white/60 hover:text-white text-sm transition-colors">
+            + Create Subject
+          </Link>
+          <Link to="/dashboard" className="flex items-center space-x-2 text-white/60 hover:text-white text-sm transition-colors">
             ← Back to Dashboard
           </Link>
         </div>

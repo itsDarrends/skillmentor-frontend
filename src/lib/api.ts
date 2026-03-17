@@ -55,6 +55,13 @@ export async function getMyEnrollments(token: string): Promise<Enrollment[]> {
   return res.json();
 }
 
+// ─── ADMIN ────────────────────────────────────────────────────────
+
+export async function adminGetStats(token: string) {
+  const res = await fetchWithAuth("/api/v1/admin/stats", token);
+  return res.json();
+}
+
 export async function adminGetAllSessions(token: string) {
   const res = await fetchWithAuth("/api/v1/admin/sessions", token);
   return res.json();
@@ -66,14 +73,10 @@ export async function adminUpdateSessionStatus(
   status?: string,
   sessionStatus?: string,
 ) {
-  const res = await fetchWithAuth(
-    `/api/v1/admin/sessions/${id}/status`,
-    token,
-    {
-      method: "PATCH",
-      body: JSON.stringify({ status, sessionStatus }),
-    },
-  );
+  const res = await fetchWithAuth(`/api/v1/admin/sessions/${id}/status`, token, {
+    method: "PATCH",
+    body: JSON.stringify({ status, sessionStatus }),
+  });
   return res.json();
 }
 
@@ -82,15 +85,58 @@ export async function adminUpdateMeetingLink(
   id: number,
   meetingLink: string,
 ) {
-  const res = await fetchWithAuth(
-    `/api/v1/admin/sessions/${id}/meeting-link`,
-    token,
-    {
-      method: "PATCH",
-      body: JSON.stringify({ meetingLink }),
-    },
-  );
+  const res = await fetchWithAuth(`/api/v1/admin/sessions/${id}/meeting-link`, token, {
+    method: "PATCH",
+    body: JSON.stringify({ meetingLink }),
+  });
   return res.json();
+}
+
+export async function adminDeleteSession(token: string, id: number) {
+  await fetchWithAuth(`/api/v1/admin/sessions/${id}`, token, { method: "DELETE" });
+}
+
+export async function adminGetAllMentors(token: string) {
+  const res = await fetchWithAuth("/api/v1/admin/mentors", token);
+  return res.json();
+}
+
+export async function adminUpdateMentor(token: string, id: number, data: object) {
+  const res = await fetchWithAuth(`/api/v1/admin/mentors/${id}`, token, {
+    method: "PUT",
+    body: JSON.stringify(data),
+  });
+  return res.json();
+}
+
+export async function adminDeleteMentor(token: string, id: number) {
+  await fetchWithAuth(`/api/v1/admin/mentors/${id}`, token, { method: "DELETE" });
+}
+
+export async function adminGetAllSubjects(token: string) {
+  const res = await fetchWithAuth("/api/v1/admin/subjects", token);
+  return res.json();
+}
+
+export async function adminUpdateSubject(token: string, id: number, data: object) {
+  const res = await fetchWithAuth(`/api/v1/admin/subjects/${id}`, token, {
+    method: "PUT",
+    body: JSON.stringify(data),
+  });
+  return res.json();
+}
+
+export async function adminDeleteSubject(token: string, id: number) {
+  await fetchWithAuth(`/api/v1/admin/subjects/${id}`, token, { method: "DELETE" });
+}
+
+export async function adminGetAllStudents(token: string) {
+  const res = await fetchWithAuth("/api/v1/admin/students", token);
+  return res.json();
+}
+
+export async function adminDeleteStudent(token: string, id: number) {
+  await fetchWithAuth(`/api/v1/admin/students/${id}`, token, { method: "DELETE" });
 }
 
 export async function createMentor(token: string, data: object) {
