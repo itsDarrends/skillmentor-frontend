@@ -1,30 +1,33 @@
 import { useAuth, useUser } from "@clerk/clerk-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link, Outlet, useNavigate, useLocation } from "react-router";
 import { LayoutDashboard, Users, BookOpen, Menu } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export default function AdminLayout() {
-  const { isLoaded, isSignedIn } = useAuth();
-  const { user } = useUser();
+  const { isLoaded: authLoaded, isSignedIn } = useAuth();
+  const { user, isLoaded: userLoaded } = useUser();
   const navigate = useNavigate();
   const location = useLocation();
+  const [checked, setChecked] = useState(false);
 
   useEffect(() => {
-    if (!isLoaded) return;
+    if (!authLoaded || !userLoaded) return;
     if (!isSignedIn) {
       navigate("/login");
       return;
     }
     const roles = user?.publicMetadata?.roles as string[] | undefined;
-    if (!roles?.includes("admin")) {
+    if (!roles?.includes("ADMIN")) {
       navigate("/dashboard");
+      return;
     }
-  }, [isLoaded, isSignedIn, user, navigate]);
+    setChecked(true);
+  }, [authLoaded, userLoaded, isSignedIn, user, navigate]);
 
-  if (!isLoaded) return (
+  if (!checked) return (
     <div className="flex items-center justify-center min-h-screen">
-      Loading...
+      <p className="text-muted-foreground">Loading...</p>
     </div>
   );
 
