@@ -4,6 +4,8 @@ import HomePage from "@/pages/HomePage";
 import LoginPage from "@/pages/LoginPage";
 import DashboardPage from "@/pages/DashboardPage";
 import PaymentPage from "@/pages/PaymentPage";
+import AboutPage from "@/pages/AboutPage";
+import ResourcesPage from "@/pages/ResourcesPage";
 import AdminLayout from "@/pages/admin/AdminLayout";
 import CreateSubjectPage from "@/pages/admin/CreateSubjectPage";
 import CreateMentorPage from "@/pages/admin/CreateMentorPage";
@@ -14,7 +16,7 @@ function RoleRedirect() {
   const { user, isLoaded } = useUser();
   if (!isLoaded) return null;
   const roles = user?.publicMetadata?.roles as string[] | undefined;
-  if (roles?.includes("admin")) return <Navigate to="/admin/bookings" />;
+  if (roles?.includes("ADMIN")) return <Navigate to="/admin/bookings" />;
   return <Navigate to="/dashboard" />;
 }
 
@@ -24,6 +26,8 @@ function App() {
       <Routes>
         <Route path="/" element={<Layout><HomePage /></Layout>} />
         <Route path="/login" element={<Layout><LoginPage /></Layout>} />
+        <Route path="/about" element={<Layout><AboutPage /></Layout>} />
+        <Route path="/resources" element={<Layout><ResourcesPage /></Layout>} />
         <Route
           path="/dashboard"
           element={
