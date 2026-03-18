@@ -6,6 +6,7 @@ import DashboardPage from "@/pages/DashboardPage";
 import PaymentPage from "@/pages/PaymentPage";
 import AboutPage from "@/pages/AboutPage";
 import ResourcesPage from "@/pages/ResourcesPage";
+import MentorProfilePage from "@/pages/MentorProfilePage";
 import AdminLayout from "@/pages/admin/AdminLayout";
 import StatsPage from "@/pages/admin/StatsPage";
 import CreateSubjectPage from "@/pages/admin/CreateSubjectPage";
@@ -32,6 +33,7 @@ function App() {
         <Route path="/login" element={<Layout><LoginPage /></Layout>} />
         <Route path="/about" element={<Layout><AboutPage /></Layout>} />
         <Route path="/resources" element={<Layout><ResourcesPage /></Layout>} />
+        <Route path="/mentors/:mentorId" element={<Layout><MentorProfilePage /></Layout>} />
         <Route
           path="/dashboard"
           element={
@@ -60,10 +62,7 @@ function App() {
           <Route path="subjects/create" element={<CreateSubjectPage />} />
           <Route path="students" element={<ManageStudentsPage />} />
         </Route>
-        <Route
-          path="/redirect"
-          element={<SignedIn><RoleRedirect /></SignedIn>}
-        />
+        <Route path="/redirect" element={<SignedIn><RoleRedirect /></SignedIn>} />
         <Route path="*" element={<Layout><LoginPage /></Layout>} />
       </Routes>
     </BrowserRouter>

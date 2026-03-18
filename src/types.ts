@@ -1,4 +1,3 @@
-// Modified to match with backend SubjectResponseDTO
 export interface Subject {
   id: number;
   subjectName: string;
@@ -6,7 +5,6 @@ export interface Subject {
   courseImageUrl: string;
 }
 
-// Modified to match with backend MentorResponseDTO (from GET /api/v1/mentors)
 export interface Mentor {
   id: number;
   mentorId: string;
@@ -26,7 +24,21 @@ export interface Mentor {
   subjects: Subject[];
 }
 
-// Modified to match with SessionResponseDTO (from GET /api/v1/sessions/my-sessions)
+export interface MentorProfile {
+  mentor: Mentor;
+  totalStudentsTaught: number;
+  averageRating: number;
+  totalReviews: number;
+  reviews: Review[];
+}
+
+export interface Review {
+  studentName: string;
+  review: string;
+  rating: number;
+  date: string;
+}
+
 export interface Enrollment {
   id: number;
   mentorName: string;
@@ -37,6 +49,8 @@ export interface Enrollment {
   sessionStatus: string;
   paymentStatus: "pending" | "accepted" | "completed" | "cancelled";
   meetingLink: string | null;
+  studentReview: string | null;
+  studentRating: number | null;
 }
 
 export interface User {
