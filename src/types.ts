@@ -30,6 +30,7 @@ export interface MentorProfile {
   averageRating: number;
   totalReviews: number;
   reviews: Review[];
+  subjectEnrollments: Record<number, number>;
 }
 
 export interface Review {

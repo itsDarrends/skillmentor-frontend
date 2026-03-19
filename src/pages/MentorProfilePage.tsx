@@ -48,13 +48,26 @@ export default function MentorProfilePage() {
     </div>
   );
 
-  const { mentor, totalStudentsTaught, averageRating, totalReviews, reviews } = profile;
+  const {
+    mentor,
+    totalStudentsTaught,
+    averageRating,
+    totalReviews,
+    reviews,
+    subjectEnrollments,
+  } = profile;
+
   const mentorName = `${mentor.firstName} ${mentor.lastName}`;
-  const mentorForModal: Mentor = selectedSubject ? { ...mentor, subjects: [selectedSubject] } : mentor;
+  const mentorForModal: Mentor = selectedSubject
+    ? { ...mentor, subjects: [selectedSubject] }
+    : mentor;
 
   return (
     <div className="container py-10 max-w-5xl">
-      <Link to="/" className="flex items-center gap-2 text-muted-foreground hover:text-foreground mb-8 transition-colors">
+      <Link
+        to="/"
+        className="flex items-center gap-2 text-muted-foreground hover:text-foreground mb-8 transition-colors"
+      >
         <ArrowLeft className="size-4" /> Back to Mentors
       </Link>
 
@@ -84,9 +97,15 @@ export default function MentorProfilePage() {
           </div>
           <p className="text-xl text-muted-foreground mb-1">{mentor.title}</p>
           <div className="flex flex-wrap gap-4 text-sm text-muted-foreground mb-4">
-            <span className="flex items-center gap-1"><Building2 className="size-4" />{mentor.company}</span>
-            <span className="flex items-center gap-1"><Calendar className="size-4" />Since {mentor.startYear}</span>
-            <span className="flex items-center gap-1"><ThumbsUp className="size-4" />{mentor.positiveReviews}% positive</span>
+            <span className="flex items-center gap-1">
+              <Building2 className="size-4" />{mentor.company}
+            </span>
+            <span className="flex items-center gap-1">
+              <Calendar className="size-4" />Since {mentor.startYear}
+            </span>
+            <span className="flex items-center gap-1">
+              <ThumbsUp className="size-4" />{mentor.positiveReviews}% positive
+            </span>
             {averageRating > 0 && (
               <span className="flex items-center gap-1">
                 <Star className="size-4 fill-yellow-400 text-yellow-400" />
@@ -140,32 +159,35 @@ export default function MentorProfilePage() {
           <p className="text-muted-foreground">No subjects available yet.</p>
         ) : (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {mentor.subjects.map((subject) => (
-              <Card key={subject.id} className="overflow-hidden">
-                {subject.courseImageUrl && (
-                  <img
-                    src={subject.courseImageUrl}
-                    alt={subject.subjectName}
-                    className="w-full h-32 object-cover"
-                  />
-                )}
-                <CardContent className="pt-4">
-                  <h3 className="font-semibold mb-1">{subject.subjectName}</h3>
-                  <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
-                    {subject.description}
-                  </p>
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-muted-foreground flex items-center gap-1">
-                      <GraduationCap className="size-3" />
-                      {mentor.totalEnrollments} enrolled
-                    </span>
-                    <Button size="sm" onClick={() => handleBookSubject(subject)}>
-                      Book Session
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+            {mentor.subjects.map((subject) => {
+              const enrollmentCount = subjectEnrollments?.[subject.id] ?? 0;
+              return (
+                <Card key={subject.id} className="overflow-hidden">
+                  {subject.courseImageUrl && (
+                    <img
+                      src={subject.courseImageUrl}
+                      alt={subject.subjectName}
+                      className="w-full h-32 object-cover"
+                    />
+                  )}
+                  <CardContent className="pt-4">
+                    <h3 className="font-semibold mb-1">{subject.subjectName}</h3>
+                    <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
+                      {subject.description}
+                    </p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-muted-foreground flex items-center gap-1">
+                        <GraduationCap className="size-3" />
+                        {enrollmentCount} students enrolled
+                      </span>
+                      <Button size="sm" onClick={() => handleBookSubject(subject)}>
+                        Book Session
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         )}
       </div>
@@ -184,7 +206,11 @@ export default function MentorProfilePage() {
                       {Array.from({ length: 5 }).map((_, j) => (
                         <Star
                           key={j}
-                          className={`size-4 ${j < review.rating ? "fill-yellow-400 text-yellow-400" : "text-gray-300"}`}
+                          className={`size-4 ${
+                            j < review.rating
+                              ? "fill-yellow-400 text-yellow-400"
+                              : "text-gray-300"
+                          }`}
                         />
                       ))}
                     </div>

@@ -1,211 +1,114 @@
-import { useEffect, useState } from "react";
-import { useAuth, useUser } from "@clerk/clerk-react";
-import { CalendarDays, Star, ExternalLink } from "lucide-react";
-import { StatusPill } from "@/components/StatusPill";
-import { getMyEnrollments, submitReview } from "@/lib/api";
-import type { Enrollment } from "@/types";
-import { useNavigate, Link } from "react-router";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
+import { Link } from "react-router";
+import { useAuth, SignInButton, UserButton, useUser } from "@clerk/clerk-react";
+import SkillMentorLogo from "@/assets/logo.webp";
+import { Menu } from "lucide-react";
+import { useState } from "react";
+import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet";
 
-export default function DashboardPage() {
-  const { isLoaded, isSignedIn, getToken } = useAuth();
+export function Navigation() {
+  const { isSignedIn } = useAuth();
   const { user } = useUser();
-  const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
-  const [reviewingId, setReviewingId] = useState<number | null>(null);
-  const [reviewText, setReviewText] = useState("");
-  const [reviewRating, setReviewRating] = useState(5);
-  const [submitting, setSubmitting] = useState(false);
-  const router = useNavigate();
+  const [isOpen, setIsOpen] = useState(false);
 
-  const fetchEnrollments = async () => {
-    if (!user) return;
-    const token = await getToken({ template: "skillmentor-auth" });
-    if (!token) return;
-    try {
-      const data = await getMyEnrollments(token);
-      setEnrollments(data);
-    } catch (err) {
-      console.error("Failed to fetch enrollments", err);
-    }
-  };
-
-  useEffect(() => {
-    if (isLoaded && isSignedIn) {
-      fetchEnrollments();
-    }
-  }, [isLoaded, isSignedIn, user]);
-
-  const handleSubmitReview = async () => {
-    if (!reviewingId) return;
-    const token = await getToken({ template: "skillmentor-auth" });
-    if (!token) return;
-    setSubmitting(true);
-    try {
-      await submitReview(token, reviewingId, reviewText, reviewRating);
-      setReviewingId(null);
-      setReviewText("");
-      setReviewRating(5);
-      fetchEnrollments();
-    } catch (err) {
-      console.error("Failed to submit review", err);
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  if (!isLoaded) {
-    return (
-      <div className="container py-10">
-        <div className="flex items-center justify-center">
-          <div className="text-lg">Loading...</div>
-        </div>
-      </div>
-    );
-  }
-
-  if (!isSignedIn) {
-    router("/login");
-    return null;
-  }
+  const isAdmin = (user?.publicMetadata?.roles as string[] | undefined)?.includes("ADMIN");
 
   return (
-    <div className="container py-10">
-      <h1 className="text-3xl font-bold tracking-tight mb-6">My Courses</h1>
-
-      {enrollments.length === 0 ? (
-        <div className="text-center py-20">
-          <p className="text-muted-foreground mb-4">No courses enrolled yet.</p>
-          <Link to="/">
-            <Button>Browse Mentors</Button>
+    <header className="sticky top-0 z-50 py-2 text-white w-full bg-black backdrop-blur supports-[backdrop-filter]:bg-black/90">
+      <div className="container flex flex-wrap h-14 items-center justify-between">
+        <div className="flex items-center">
+          <Link to="/" className="flex items-center space-x-2">
+            <img src={SkillMentorLogo} alt="SkillMentor Logo" className="size-12 rounded-full" />
+            <span className="font-semibold text-xl">SkillMentor</span>
           </Link>
+          <nav className="ml-6 hidden md:flex items-center gap-6 text-sm font-medium">
+            <Link to="/" className="hover:text-primary transition-colors">Tutors</Link>
+            <Link to="/about" className="hover:text-primary transition-colors">About Us</Link>
+            <Link to="/resources" className="hover:text-primary transition-colors">Resources</Link>
+            {isAdmin && (
+              <Link to="/admin/bookings" className="hover:text-primary transition-colors">
+                Admin Panel
+              </Link>
+            )}
+          </nav>
         </div>
-      ) : (
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {enrollments.map((enrollment) => (
-            <div
-              key={enrollment.id}
-              className="rounded-2xl p-6 relative overflow-hidden bg-linear-to-br from-blue-500 to-blue-600"
-            >
-              <div className="absolute top-4 right-4">
-                <StatusPill status={enrollment.paymentStatus} />
-              </div>
 
-              <div className="size-24 rounded-full bg-white/10 mb-4">
-                {enrollment.mentorProfileImageUrl ? (
-                  <img
-                    src={enrollment.mentorProfileImageUrl}
-                    alt={enrollment.mentorName}
-                    className="w-full h-full rounded-full object-cover object-top"
-                  />
-                ) : (
-                  <div className="w-full h-full rounded-full flex items-center justify-center text-white text-2xl font-bold">
-                    {enrollment.mentorName.charAt(0)}
-                  </div>
-                )}
-              </div>
+        <div className="hidden md:flex items-center gap-2">
+          {isSignedIn ? (
+            <>
+              <Link to="/dashboard">
+                <Button variant="ghost">Dashboard</Button>
+              </Link>
+              <UserButton appearance={{ elements: { avatarBox: "w-8 h-8" } }} />
+            </>
+          ) : (
+            <>
+              <SignInButton forceRedirectUrl="/redirect" mode="modal">
+                <Button variant="ghost">Login</Button>
+              </SignInButton>
+              <Link to="/login">
+                <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
+                  Sign up
+                </Button>
+              </Link>
+            </>
+          )}
+        </div>
 
-              <div className="space-y-1">
-                <h2 className="text-xl font-semibold text-white">
-                  {enrollment.subjectName}
-                </h2>
-                <p className="text-blue-100/80">Mentor: {enrollment.mentorName}</p>
-                <div className="flex items-center text-blue-100/80 text-sm mt-2">
-                  <CalendarDays className="mr-2 h-4 w-4" />
-                  Next Session: {new Date(enrollment.sessionAt).toLocaleDateString()}
+        <div className="md:hidden">
+          <Sheet open={isOpen} onOpenChange={setIsOpen}>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="text-white hover:bg-white/10">
+                <Menu className="size-6" />
+                <span className="sr-only">Toggle menu</span>
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-[300px] bg-black text-white p-6">
+              <div className="flex flex-col h-full">
+                <div className="flex items-center justify-between mb-8">
+                  <Link to="/" className="flex items-center space-x-2" onClick={() => setIsOpen(false)}>
+                    <img src={SkillMentorLogo} alt="SkillMentor Logo" className="size-10 rounded-full" />
+                    <span className="font-semibold text-lg">SkillMentor</span>
+                  </Link>
                 </div>
-
-                {enrollment.meetingLink && enrollment.sessionStatus === "accepted" && (
-                  
-                    href={enrollment.meetingLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-1 text-white text-sm mt-2 underline"
-                  >
-                    <ExternalLink className="size-3" /> Join Meeting
-                  </a>
-                )}
-
-                {enrollment.sessionStatus === "completed" && !enrollment.studentReview && (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="mt-3 bg-white/10 text-white border-white/30 hover:bg-white/20"
-                    onClick={() => {
-                      setReviewingId(enrollment.id);
-                      setReviewText("");
-                      setReviewRating(5);
-                    }}
-                  >
-                    Write Review
-                  </Button>
-                )}
-
-                {enrollment.studentReview && (
-                  <div className="mt-2 text-xs text-blue-100/70 italic">
-                    Your review: "{enrollment.studentReview}"
-                  </div>
-                )}
+                <nav className="flex flex-col gap-4 text-sm font-medium flex-1">
+                  <Link to="/" className="hover:text-primary transition-colors" onClick={() => setIsOpen(false)}>Tutors</Link>
+                  <Link to="/about" className="hover:text-primary transition-colors" onClick={() => setIsOpen(false)}>About Us</Link>
+                  <Link to="/resources" className="hover:text-primary transition-colors" onClick={() => setIsOpen(false)}>Resources</Link>
+                  {isAdmin && (
+                    <Link to="/admin/bookings" className="hover:text-primary transition-colors" onClick={() => setIsOpen(false)}>
+                      Admin Panel
+                    </Link>
+                  )}
+                </nav>
+                <div className="pt-6 border-t border-white/10 flex flex-col gap-4">
+                  {isSignedIn ? (
+                    <>
+                      <Link to="/dashboard" onClick={() => setIsOpen(false)}>
+                        <Button variant="ghost" className="w-full">Dashboard</Button>
+                      </Link>
+                      <div className="flex justify-center">
+                        <UserButton appearance={{ elements: { avatarBox: "w-8 h-8" } }} />
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <SignInButton forceRedirectUrl="/redirect" mode="modal">
+                        <Button variant="ghost" className="w-full">Login</Button>
+                      </SignInButton>
+                      <Link to="/login" onClick={() => setIsOpen(false)}>
+                        <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90">
+                          Sign up
+                        </Button>
+                      </Link>
+                    </>
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            </SheetContent>
+          </Sheet>
         </div>
-      )}
-
-      <Dialog open={!!reviewingId} onOpenChange={() => setReviewingId(null)}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Write a Review</DialogTitle>
-            <DialogDescription>
-              Share your experience with this session.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <p className="text-sm font-medium mb-2">Rating</p>
-              <div className="flex gap-1">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <button key={star} onClick={() => setReviewRating(star)}>
-                    <Star
-                      className={`size-6 ${
-                        star <= reviewRating
-                          ? "fill-yellow-400 text-yellow-400"
-                          : "text-gray-300"
-                      }`}
-                    />
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div>
-              <p className="text-sm font-medium mb-2">Your Review</p>
-              <textarea
-                value={reviewText}
-                onChange={(e) => setReviewText(e.target.value)}
-                placeholder="Share your experience..."
-                className="w-full min-h-[100px] rounded-md border border-input bg-background px-3 py-2 text-sm"
-              />
-            </div>
-            <div className="flex gap-2 justify-end">
-              <Button variant="outline" onClick={() => setReviewingId(null)}>
-                Cancel
-              </Button>
-              <Button
-                onClick={handleSubmitReview}
-                disabled={submitting || !reviewText}
-              >
-                {submitting ? "Submitting..." : "Submit Review"}
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-    </div>
+      </div>
+    </header>
   );
 }

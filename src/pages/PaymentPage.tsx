@@ -13,6 +13,7 @@ import {
 import { useToast } from "@/components/hooks/use-toast";
 import { useAuth } from "@clerk/clerk-react";
 import { enrollInSession } from "@/lib/api";
+import { AlertCircle } from "lucide-react";
 
 export default function PaymentPage() {
   const navigate = useNavigate();
@@ -22,6 +23,7 @@ export default function PaymentPage() {
   const { getToken } = useAuth();
   const [file, setFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [bookingError, setBookingError] = useState("");
 
   const date = searchParams.get("date");
   const courseTitle = searchParams.get("courseTitle");
@@ -43,6 +45,7 @@ export default function PaymentPage() {
     if (!file || !date || !mentorId || !subjectId || !sessionId) return;
 
     setIsUploading(true);
+    setBookingError("");
 
     try {
       const token = await getToken({ template: "skillmentor-auth" });
@@ -64,13 +67,26 @@ export default function PaymentPage() {
       setTimeout(() => {
         navigate("/dashboard");
       }, 2000);
-    } catch (error) {
-      toast({
-        title: "Error",
-        description:
-          "There was a problem scheduling your session. Please try again.",
-        variant: "destructive",
-      });
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : "An unexpected error occurred.";
+
+      if (
+        message.includes("active booking") ||
+        message.includes("already") ||
+        message.includes("conflict") ||
+        message.includes("past") ||
+        message.includes("not available")
+      ) {
+        setBookingError(message);
+      } else {
+        toast({
+          title: "Error",
+          description:
+            "There was a problem scheduling your session. Please try again.",
+          variant: "destructive",
+        });
+      }
       setIsUploading(false);
     }
   };
@@ -96,6 +112,31 @@ export default function PaymentPage() {
                 <strong>Session Date:</strong> {sessionDate}
               </div>
             )}
+
+            {/* Double-booking / conflict error banner */}
+            {bookingError && (
+              <div className="flex items-start gap-3 rounded-lg border border-destructive/50 bg-destructive/10 p-4">
+                <AlertCircle className="size-5 text-destructive shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-sm font-semibold text-destructive">
+                    Booking Failed
+                  </p>
+                  <p className="text-sm text-destructive/90 mt-1">
+                    {bookingError}
+                  </p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="mt-3 border-destructive/40 text-destructive hover:bg-destructive/10"
+                    onClick={() => navigate(-1)}
+                  >
+                    Go Back & Change Date
+                  </Button>
+                </div>
+              </div>
+            )}
+
             <div className="space-y-2">
               <Label htmlFor="slip">Bank Transfer Slip</Label>
               <Input
@@ -115,7 +156,7 @@ export default function PaymentPage() {
             <Button
               type="submit"
               className="w-full"
-              disabled={!file || isUploading}
+              disabled={!file || isUploading || !!bookingError}
             >
               {isUploading ? "Verifying..." : "Confirm Payment"}
             </Button>
