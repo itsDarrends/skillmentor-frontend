@@ -4,6 +4,13 @@ SkillMentor is a full-stack online mentoring platform that connects students wit
 
 ---
 
+## Repositories
+
+- **Frontend:** https://github.com/itsDarrends/skillmentor-frontend
+- **Backend:** https://github.com/itsDarrends/skillmentor-backend
+
+---
+
 ## Features
 
 ### Student Features
