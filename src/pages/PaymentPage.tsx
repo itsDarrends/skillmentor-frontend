@@ -4,11 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
+  Card, CardContent, CardFooter, CardHeader, CardTitle,
 } from "@/components/ui/card";
 import { useToast } from "@/components/hooks/use-toast";
 import { useAuth } from "@clerk/clerk-react";
@@ -64,20 +60,22 @@ export default function PaymentPage() {
           "Your bank slip has been uploaded and verified. Session scheduled successfully.",
       });
 
-      setTimeout(() => {
-        navigate("/dashboard");
-      }, 2000);
+      setTimeout(() => navigate("/dashboard"), 2000);
+
     } catch (error: unknown) {
       const message =
         error instanceof Error ? error.message : "An unexpected error occurred.";
 
-      if (
+      // check for known conflict/booking errors
+      const isBookingConflict =
         message.includes("active booking") ||
         message.includes("already") ||
         message.includes("conflict") ||
         message.includes("past") ||
-        message.includes("not available")
-      ) {
+        message.includes("not available") ||
+        message.includes("409");
+
+      if (isBookingConflict) {
         setBookingError(message);
       } else {
         toast({
@@ -87,6 +85,8 @@ export default function PaymentPage() {
           variant: "destructive",
         });
       }
+    } finally {
+      // 👇 always reset uploading state no matter what happens
       setIsUploading(false);
     }
   };
@@ -100,9 +100,7 @@ export default function PaymentPage() {
         <form onSubmit={handleUpload}>
           <CardContent className="space-y-4">
             {mentorName && (
-              <div className="text-sm font-medium">
-                Session with: {mentorName}
-              </div>
+              <div className="text-sm font-medium">Session with: {mentorName}</div>
             )}
             {courseTitle && (
               <div className="text-sm text-muted-foreground">{courseTitle}</div>
@@ -113,17 +111,13 @@ export default function PaymentPage() {
               </div>
             )}
 
-            {/* Double-booking / conflict error banner */}
+            {/* Booking conflict error banner */}
             {bookingError && (
               <div className="flex items-start gap-3 rounded-lg border border-destructive/50 bg-destructive/10 p-4">
                 <AlertCircle className="size-5 text-destructive shrink-0 mt-0.5" />
                 <div>
-                  <p className="text-sm font-semibold text-destructive">
-                    Booking Failed
-                  </p>
-                  <p className="text-sm text-destructive/90 mt-1">
-                    {bookingError}
-                  </p>
+                  <p className="text-sm font-semibold text-destructive">Booking Failed</p>
+                  <p className="text-sm text-destructive/90 mt-1">{bookingError}</p>
                   <Button
                     type="button"
                     variant="outline"
@@ -148,8 +142,7 @@ export default function PaymentPage() {
               />
             </div>
             <div className="text-sm text-muted-foreground">
-              Please upload a clear image of your bank transfer slip to confirm
-              your payment.
+              Please upload a clear image of your bank transfer slip to confirm your payment.
             </div>
           </CardContent>
           <CardFooter>

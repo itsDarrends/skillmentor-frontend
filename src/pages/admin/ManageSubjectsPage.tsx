@@ -3,7 +3,8 @@ import { useAuth } from "@clerk/clerk-react";
 import { useNavigate } from "react-router";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { adminGetAllSubjects, adminDeleteSubject, adminUpdateSubject } from "@/lib/api";
+import { adminGetAllSubjects, adminDeleteSubject, adminUpdateSubject, getPublicMentors } from "@/lib/api";
+import type { Mentor } from "@/types";
 
 interface Subject {
   id: number;
@@ -17,9 +18,10 @@ export default function ManageSubjectsPage() {
   const { getToken } = useAuth();
   const navigate = useNavigate();
   const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [mentors, setMentors] = useState<Mentor[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<number | null>(null);
-  const [editForm, setEditForm] = useState<Partial<Subject>>({});
+  const [editForm, setEditForm] = useState<Partial<Subject> & { mentorId?: string }>({});
   const [search, setSearch] = useState("");
 
   const fetchSubjects = async () => {
@@ -33,7 +35,10 @@ export default function ManageSubjectsPage() {
     }
   };
 
-  useEffect(() => { fetchSubjects(); }, []);
+  useEffect(() => {
+    fetchSubjects();
+    getPublicMentors().then((data) => setMentors(data.content));
+  }, []);
 
   const handleDelete = async (id: number) => {
     if (!confirm("Are you sure you want to delete this subject?")) return;
@@ -45,7 +50,10 @@ export default function ManageSubjectsPage() {
 
   const handleEdit = (subject: Subject) => {
     setEditingId(subject.id);
-    setEditForm(subject);
+    setEditForm({
+      ...subject,
+      mentorId: String(subject.mentor?.id ?? ""),
+    });
   };
 
   const handleUpdate = async () => {
@@ -55,6 +63,7 @@ export default function ManageSubjectsPage() {
       subjectName: editForm.subjectName,
       description: editForm.description,
       courseImageUrl: editForm.courseImageUrl,
+      mentorId: editForm.mentorId, // 👈 include mentorId
     });
     setEditingId(null);
     fetchSubjects();
@@ -93,21 +102,56 @@ export default function ManageSubjectsPage() {
               </tr>
             </thead>
             <tbody className="divide-y">
-              {filtered.map((subject) => (
+              {filtered.map((subject) =>
                 editingId === subject.id ? (
                   <tr key={subject.id} className="bg-yellow-50">
                     <td className="px-4 py-3">{subject.id}</td>
                     <td className="px-4 py-3">
-                      <Input value={editForm.subjectName ?? ""} onChange={(e) => setEditForm({ ...editForm, subjectName: e.target.value })} className="h-7 text-xs w-48" />
+                      <Input
+                        value={editForm.subjectName ?? ""}
+                        onChange={(e) => setEditForm({ ...editForm, subjectName: e.target.value })}
+                        className="h-7 text-xs w-48"
+                      />
                     </td>
                     <td className="px-4 py-3">
-                      <Input value={editForm.description ?? ""} onChange={(e) => setEditForm({ ...editForm, description: e.target.value })} className="h-7 text-xs w-48" />
+                      <Input
+                        value={editForm.description ?? ""}
+                        onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+                        className="h-7 text-xs w-48"
+                      />
                     </td>
-                    <td className="px-4 py-3">{subject.mentor?.firstName} {subject.mentor?.lastName}</td>
+                    {/* 👇 mentor dropdown in edit mode */}
+                    <td className="px-4 py-3">
+                      <select
+                        value={editForm.mentorId ?? ""}
+                        onChange={(e) => setEditForm({ ...editForm, mentorId: e.target.value })}
+                        className="rounded-md border border-input bg-background px-2 py-1 text-xs w-40"
+                      >
+                        <option value="">Select mentor...</option>
+                        {mentors.map((m) => (
+                          <option key={m.id} value={m.id}>
+                            {m.firstName} {m.lastName}
+                          </option>
+                        ))}
+                      </select>
+                    </td>
                     <td className="px-4 py-3">
                       <div className="flex gap-2">
-                        <Button size="sm" className="h-7 text-xs bg-green-600 hover:bg-green-700 text-white" onClick={handleUpdate}>Save</Button>
-                        <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => setEditingId(null)}>Cancel</Button>
+                        <Button
+                          size="sm"
+                          className="h-7 text-xs bg-green-600 hover:bg-green-700 text-white"
+                          onClick={handleUpdate}
+                        >
+                          Save
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-7 text-xs"
+                          onClick={() => setEditingId(null)}
+                        >
+                          Cancel
+                        </Button>
                       </div>
                     </td>
                   </tr>
@@ -116,16 +160,31 @@ export default function ManageSubjectsPage() {
                     <td className="px-4 py-3">{subject.id}</td>
                     <td className="px-4 py-3">{subject.subjectName}</td>
                     <td className="px-4 py-3 max-w-xs truncate">{subject.description ?? "—"}</td>
-                    <td className="px-4 py-3">{subject.mentor?.firstName} {subject.mentor?.lastName}</td>
+                    <td className="px-4 py-3">
+                      {subject.mentor?.firstName} {subject.mentor?.lastName}
+                    </td>
                     <td className="px-4 py-3">
                       <div className="flex gap-2">
-                        <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => handleEdit(subject)}>Edit</Button>
-                        <Button size="sm" className="h-7 text-xs bg-red-600 hover:bg-red-700 text-white" onClick={() => handleDelete(subject.id)}>Delete</Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-7 text-xs"
+                          onClick={() => handleEdit(subject)}
+                        >
+                          Edit
+                        </Button>
+                        <Button
+                          size="sm"
+                          className="h-7 text-xs bg-red-600 hover:bg-red-700 text-white"
+                          onClick={() => handleDelete(subject.id)}
+                        >
+                          Delete
+                        </Button>
                       </div>
                     </td>
                   </tr>
                 )
-              ))}
+              )}
             </tbody>
           </table>
         </div>

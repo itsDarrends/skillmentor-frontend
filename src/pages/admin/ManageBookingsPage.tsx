@@ -79,7 +79,7 @@ export default function ManageBookingsPage() {
   const handleMarkComplete = async (id: number) => {
     const token = await getToken({ template: "skillmentor-auth" });
     if (!token) return;
-    await adminUpdateSessionStatus(token, id, undefined, "completed");
+    await adminUpdateSessionStatus(token, id, "completed", "completed");
     fetchSessions();
   };
 
@@ -95,8 +95,10 @@ export default function ManageBookingsPage() {
   const handleSort = (field: SortField) => {
     if (sortField === field) {
       if (sortDirection === "asc") setSortDirection("desc");
-      else if (sortDirection === "desc") { setSortField(null); setSortDirection(null); }
-      else setSortDirection("asc");
+      else if (sortDirection === "desc") {
+        setSortField(null);
+        setSortDirection(null);
+      } else setSortDirection("asc");
     } else {
       setSortField(field);
       setSortDirection("asc");
@@ -104,8 +106,10 @@ export default function ManageBookingsPage() {
   };
 
   const SortIcon = ({ field }: { field: SortField }) => {
-    if (sortField !== field) return <ChevronsUpDown className="inline size-3 ml-1 opacity-40" />;
-    if (sortDirection === "asc") return <ChevronUp className="inline size-3 ml-1" />;
+    if (sortField !== field)
+      return <ChevronsUpDown className="inline size-3 ml-1 opacity-40" />;
+    if (sortDirection === "asc")
+      return <ChevronUp className="inline size-3 ml-1" />;
     return <ChevronDown className="inline size-3 ml-1" />;
   };
 
@@ -125,7 +129,8 @@ export default function ManageBookingsPage() {
       if (
         !s.studentName?.toLowerCase().includes(q) &&
         !s.mentorName?.toLowerCase().includes(q)
-      ) return false;
+      )
+        return false;
     }
     if (dateFrom) {
       const sessionDate = new Date(s.sessionAt);
@@ -162,7 +167,10 @@ export default function ManageBookingsPage() {
 
   // Paginate
   const totalPages = Math.ceil(sorted.length / pageSize);
-  const paginated = sorted.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  const paginated = sorted.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
 
   const clearFilters = () => {
     setSearch("");
@@ -222,21 +230,28 @@ export default function ManageBookingsPage() {
         )}
       </div>
 
-      {/* Results count */}
+      {/* Results count + page size */}
       <div className="flex items-center justify-between mb-3">
         <p className="text-sm text-muted-foreground">
-          Showing {sorted.length === 0 ? 0 : (currentPage - 1) * pageSize + 1}–
-          {Math.min(currentPage * pageSize, sorted.length)} of {sorted.length} results
+          Showing{" "}
+          {sorted.length === 0 ? 0 : (currentPage - 1) * pageSize + 1}–
+          {Math.min(currentPage * pageSize, sorted.length)} of {sorted.length}{" "}
+          results
         </p>
         <div className="flex items-center gap-2">
           <label className="text-sm text-muted-foreground">Rows per page:</label>
           <select
             value={pageSize}
-            onChange={(e) => { setPageSize(Number(e.target.value)); setCurrentPage(1); }}
+            onChange={(e) => {
+              setPageSize(Number(e.target.value));
+              setCurrentPage(1);
+            }}
             className="rounded-md border border-input bg-background px-2 py-1 text-sm"
           >
             {PAGE_SIZE_OPTIONS.map((s) => (
-              <option key={s} value={s}>{s}</option>
+              <option key={s} value={s}>
+                {s}
+              </option>
             ))}
           </select>
         </div>
@@ -296,7 +311,10 @@ export default function ManageBookingsPage() {
               </thead>
               <tbody className="divide-y">
                 {paginated.map((session) => (
-                  <tr key={session.id} className="bg-background hover:bg-muted/50">
+                  <tr
+                    key={session.id}
+                    className="bg-background hover:bg-muted/50"
+                  >
                     <td className="px-4 py-3">{session.id}</td>
                     <td className="px-4 py-3">{session.studentName ?? "—"}</td>
                     <td className="px-4 py-3">{session.mentorName ?? "—"}</td>
@@ -306,12 +324,16 @@ export default function ManageBookingsPage() {
                     </td>
                     <td className="px-4 py-3">{session.durationMinutes} min</td>
                     <td className="px-4 py-3">
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusColor(session.paymentStatus)}`}>
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs font-medium ${statusColor(session.paymentStatus)}`}
+                      >
                         {session.paymentStatus}
                       </span>
                     </td>
                     <td className="px-4 py-3">
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusColor(session.sessionStatus ?? "")}`}>
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs font-medium ${statusColor(session.sessionStatus ?? "")}`}
+                      >
                         {session.sessionStatus ?? "—"}
                       </span>
                     </td>
@@ -319,7 +341,11 @@ export default function ManageBookingsPage() {
                       <div className="flex gap-2 items-center">
                         <Input
                           placeholder="https://meet.google.com/..."
-                          value={meetingLinkInput[session.id] ?? session.meetingLink ?? ""}
+                          value={
+                            meetingLinkInput[session.id] ??
+                            session.meetingLink ??
+                            ""
+                          }
                           onChange={(e) =>
                             setMeetingLinkInput({
                               ...meetingLinkInput,
@@ -349,15 +375,17 @@ export default function ManageBookingsPage() {
                             Confirm Payment
                           </Button>
                         )}
-                        {session.paymentStatus === "accepted" && (
-                          <Button
-                            size="sm"
-                            className="h-7 text-xs bg-blue-600 hover:bg-blue-700 text-white"
-                            onClick={() => handleMarkComplete(session.id)}
-                          >
-                            Mark Complete
-                          </Button>
-                        )}
+                        {/* 👇 fixed: only show when accepted AND not already completed */}
+                        {session.paymentStatus === "accepted" &&
+                          session.sessionStatus !== "completed" && (
+                            <Button
+                              size="sm"
+                              className="h-7 text-xs bg-blue-600 hover:bg-blue-700 text-white"
+                              onClick={() => handleMarkComplete(session.id)}
+                            >
+                              Mark Complete
+                            </Button>
+                          )}
                       </div>
                     </td>
                   </tr>
@@ -388,17 +416,27 @@ export default function ManageBookingsPage() {
               >
                 ‹ Prev
               </Button>
-              {/* Page number buttons */}
               {Array.from({ length: totalPages }, (_, i) => i + 1)
-                .filter((p) => p === 1 || p === totalPages || Math.abs(p - currentPage) <= 1)
+                .filter(
+                  (p) =>
+                    p === 1 ||
+                    p === totalPages ||
+                    Math.abs(p - currentPage) <= 1
+                )
                 .reduce<(number | "...")[]>((acc, p, idx, arr) => {
-                  if (idx > 0 && p - (arr[idx - 1] as number) > 1) acc.push("...");
+                  if (idx > 0 && p - (arr[idx - 1] as number) > 1)
+                    acc.push("...");
                   acc.push(p);
                   return acc;
                 }, [])
                 .map((p, i) =>
                   p === "..." ? (
-                    <span key={`ellipsis-${i}`} className="px-2 text-muted-foreground">…</span>
+                    <span
+                      key={`ellipsis-${i}`}
+                      className="px-2 text-muted-foreground"
+                    >
+                      …
+                    </span>
                   ) : (
                     <Button
                       key={p}
@@ -413,7 +451,9 @@ export default function ManageBookingsPage() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                onClick={() =>
+                  setCurrentPage((p) => Math.min(totalPages, p + 1))
+                }
                 disabled={currentPage === totalPages}
               >
                 Next ›
