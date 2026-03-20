@@ -6,7 +6,7 @@ import AWSCertified3Img from "@/assets/aws-certified-3.webp";
 export default function LoginPage() {
   return (
     <div className="relative flex min-h-screen w-full">
-      {/* Left side - Hero Section */}
+      {/* Hero Section */}
       <div className="relative hidden lg:block lg:w-1/2">
         <div className="absolute inset-0 bg-linear-to-br from-secondary via-primary/60 to-secondary" />
         <div className="relative flex h-full flex-col justify-between p-12">
@@ -59,7 +59,7 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* Right side - Login Form */}
+      {/* Login Form */}
       <div className="flex w-full items-center justify-center px-6 lg:w-1/2">
         <div className="w-full max-w-[400px] space-y-8">
           <SignUp

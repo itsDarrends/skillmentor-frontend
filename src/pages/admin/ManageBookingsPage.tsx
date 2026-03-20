@@ -375,7 +375,7 @@ export default function ManageBookingsPage() {
                             Confirm Payment
                           </Button>
                         )}
-                        {/* 👇 fixed: only show when accepted AND not already completed */}
+                        {/* show when accepted AND not already completed */}
                         {session.paymentStatus === "accepted" &&
                           session.sessionStatus !== "completed" && (
                             <Button

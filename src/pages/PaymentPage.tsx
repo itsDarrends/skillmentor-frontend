@@ -66,7 +66,7 @@ export default function PaymentPage() {
       const message =
         error instanceof Error ? error.message : "An unexpected error occurred.";
 
-      // check for known conflict/booking errors
+      // checking for known conflict/booking errors
       const isBookingConflict =
         message.includes("active booking") ||
         message.includes("already") ||
@@ -86,7 +86,6 @@ export default function PaymentPage() {
         });
       }
     } finally {
-      // 👇 always reset uploading state no matter what happens
       setIsUploading(false);
     }
   };

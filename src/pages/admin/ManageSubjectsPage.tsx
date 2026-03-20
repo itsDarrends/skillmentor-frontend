@@ -63,7 +63,7 @@ export default function ManageSubjectsPage() {
       subjectName: editForm.subjectName,
       description: editForm.description,
       courseImageUrl: editForm.courseImageUrl,
-      mentorId: editForm.mentorId, // 👈 include mentorId
+      mentorId: editForm.mentorId,
     });
     setEditingId(null);
     fetchSubjects();
@@ -120,7 +120,7 @@ export default function ManageSubjectsPage() {
                         className="h-7 text-xs w-48"
                       />
                     </td>
-                    {/* 👇 mentor dropdown in edit mode */}
+                    {/*edit mentor dropdown*/}
                     <td className="px-4 py-3">
                       <select
                         value={editForm.mentorId ?? ""}

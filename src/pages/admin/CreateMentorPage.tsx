@@ -54,11 +54,11 @@ const mentorSchema = z.object({
 
 type MentorFormData = z.infer<typeof mentorSchema>;
 
-// ─── Live Preview Card ─────────────────────────────────────────────
-// useWatch is INSIDE this component so only the preview re-renders
+// Live Preview Card
+// UseWatch is inside this component so only the preview re-renders
 // on each keystroke, not the entire form
 function MentorPreviewCard({ control }: { control: Control<MentorFormData> }) {
-  const data = useWatch({ control }); // 👈 moved here
+  const data = useWatch({ control });
   const [imgError, setImgError] = useState(false);
 
   const fullName =
@@ -169,7 +169,7 @@ function MentorPreviewCard({ control }: { control: Control<MentorFormData> }) {
   );
 }
 
-// ─── Main Page ─────────────────────────────────────────────────────
+// Main Page
 export default function CreateMentorPage() {
   const { getToken } = useAuth();
   const [success, setSuccess] = useState(false);
@@ -226,7 +226,7 @@ export default function CreateMentorPage() {
 
   return (
     <div className="flex gap-8 items-start">
-      {/* ── Form (left) ── */}
+      {/* Form (left)*/}
       <div className="flex-1 max-w-2xl">
         <h1 className="text-3xl font-bold mb-8">Create Mentor</h1>
         <Card>
@@ -448,7 +448,7 @@ export default function CreateMentorPage() {
         </Card>
       </div>
 
-      {/* ── Live Preview (right) ── */}
+      {/* Live Preview */}
       <div className="w-80 shrink-0 hidden lg:block">
         <MentorPreviewCard control={control} />
       </div>
