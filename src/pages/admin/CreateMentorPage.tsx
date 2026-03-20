@@ -1,5 +1,5 @@
 import { useAuth } from "@clerk/clerk-react";
-import { useForm, useWatch } from "react-hook-form";
+import { useForm, useWatch, Control } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
@@ -54,14 +54,17 @@ const mentorSchema = z.object({
 
 type MentorFormData = z.infer<typeof mentorSchema>;
 
-// ─── Live Preview Card ────────────────────────────────────────────
-function MentorPreviewCard({ data }: { data: MentorFormData }) {
+// ─── Live Preview Card ─────────────────────────────────────────────
+// useWatch is INSIDE this component so only the preview re-renders
+// on each keystroke, not the entire form
+function MentorPreviewCard({ control }: { control: Control<MentorFormData> }) {
+  const data = useWatch({ control }); // 👈 moved here
+  const [imgError, setImgError] = useState(false);
+
   const fullName =
     data.firstName || data.lastName
       ? `${data.firstName} ${data.lastName}`.trim()
       : "Mentor Name";
-
-  const [imgError, setImgError] = useState(false);
 
   return (
     <Card className="flex flex-col h-full sticky top-6">
@@ -135,7 +138,9 @@ function MentorPreviewCard({ data }: { data: MentorFormData }) {
           <div className="flex items-center gap-2 text-sm">
             <GraduationCap className="size-4" />
             <span>
-              {data.totalEnrollments ? `${data.totalEnrollments} Enrollments` : "0 Enrollments"}
+              {data.totalEnrollments
+                ? `${data.totalEnrollments} Enrollments`
+                : "0 Enrollments"}
             </span>
           </div>
           {data.isCertified && (
@@ -164,7 +169,7 @@ function MentorPreviewCard({ data }: { data: MentorFormData }) {
   );
 }
 
-// ─── Main Page ────────────────────────────────────────────────────
+// ─── Main Page ─────────────────────────────────────────────────────
 export default function CreateMentorPage() {
   const { getToken } = useAuth();
   const [success, setSuccess] = useState(false);
@@ -197,9 +202,6 @@ export default function CreateMentorPage() {
     },
   });
 
-  // Watch all fields for live preview
-  const watchedValues = useWatch({ control });
-
   const onSubmit = async (data: MentorFormData) => {
     setServerError("");
     setSuccess(false);
@@ -219,7 +221,8 @@ export default function CreateMentorPage() {
     }
   };
 
-  const fieldClass = (hasError: boolean) => (hasError ? "border-destructive" : "");
+  const fieldClass = (hasError: boolean) =>
+    hasError ? "border-destructive" : "";
 
   return (
     <div className="flex gap-8 items-start">
@@ -243,7 +246,9 @@ export default function CreateMentorPage() {
                     className={fieldClass(!!errors.firstName)}
                   />
                   {errors.firstName && (
-                    <p className="text-xs text-destructive">{errors.firstName.message}</p>
+                    <p className="text-xs text-destructive">
+                      {errors.firstName.message}
+                    </p>
                   )}
                 </div>
                 <div className="space-y-1">
@@ -254,7 +259,9 @@ export default function CreateMentorPage() {
                     className={fieldClass(!!errors.lastName)}
                   />
                   {errors.lastName && (
-                    <p className="text-xs text-destructive">{errors.lastName.message}</p>
+                    <p className="text-xs text-destructive">
+                      {errors.lastName.message}
+                    </p>
                   )}
                 </div>
               </div>
@@ -269,7 +276,9 @@ export default function CreateMentorPage() {
                   className={fieldClass(!!errors.email)}
                 />
                 {errors.email && (
-                  <p className="text-xs text-destructive">{errors.email.message}</p>
+                  <p className="text-xs text-destructive">
+                    {errors.email.message}
+                  </p>
                 )}
               </div>
 
@@ -282,7 +291,9 @@ export default function CreateMentorPage() {
                   className={fieldClass(!!errors.mentorId)}
                 />
                 {errors.mentorId && (
-                  <p className="text-xs text-destructive">{errors.mentorId.message}</p>
+                  <p className="text-xs text-destructive">
+                    {errors.mentorId.message}
+                  </p>
                 )}
               </div>
 
@@ -325,7 +336,9 @@ export default function CreateMentorPage() {
                   className={fieldClass(!!errors.experienceYears)}
                 />
                 {errors.experienceYears && (
-                  <p className="text-xs text-destructive">{errors.experienceYears.message}</p>
+                  <p className="text-xs text-destructive">
+                    {errors.experienceYears.message}
+                  </p>
                 )}
               </div>
 
@@ -340,7 +353,9 @@ export default function CreateMentorPage() {
                   {...register("bio")}
                 />
                 {errors.bio && (
-                  <p className="text-xs text-destructive">{errors.bio.message}</p>
+                  <p className="text-xs text-destructive">
+                    {errors.bio.message}
+                  </p>
                 )}
               </div>
 
@@ -354,7 +369,9 @@ export default function CreateMentorPage() {
                   className={fieldClass(!!errors.profileImageUrl)}
                 />
                 {errors.profileImageUrl && (
-                  <p className="text-xs text-destructive">{errors.profileImageUrl.message}</p>
+                  <p className="text-xs text-destructive">
+                    {errors.profileImageUrl.message}
+                  </p>
                 )}
               </div>
 
@@ -370,7 +387,9 @@ export default function CreateMentorPage() {
                   className={fieldClass(!!errors.positiveReviews)}
                 />
                 {errors.positiveReviews && (
-                  <p className="text-xs text-destructive">{errors.positiveReviews.message}</p>
+                  <p className="text-xs text-destructive">
+                    {errors.positiveReviews.message}
+                  </p>
                 )}
               </div>
 
@@ -385,7 +404,9 @@ export default function CreateMentorPage() {
                   className={fieldClass(!!errors.totalEnrollments)}
                 />
                 {errors.totalEnrollments && (
-                  <p className="text-xs text-destructive">{errors.totalEnrollments.message}</p>
+                  <p className="text-xs text-destructive">
+                    {errors.totalEnrollments.message}
+                  </p>
                 )}
               </div>
 
@@ -414,7 +435,9 @@ export default function CreateMentorPage() {
                 <p className="text-sm text-destructive">{serverError}</p>
               )}
               {success && (
-                <p className="text-sm text-green-600">Mentor created successfully!</p>
+                <p className="text-sm text-green-600">
+                  Mentor created successfully!
+                </p>
               )}
 
               <Button type="submit" className="w-full" disabled={isSubmitting}>
@@ -427,7 +450,7 @@ export default function CreateMentorPage() {
 
       {/* ── Live Preview (right) ── */}
       <div className="w-80 shrink-0 hidden lg:block">
-        <MentorPreviewCard data={watchedValues as MentorFormData} />
+        <MentorPreviewCard control={control} />
       </div>
     </div>
   );
