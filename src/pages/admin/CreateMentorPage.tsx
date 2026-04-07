@@ -1,5 +1,6 @@
 import { useAuth } from "@clerk/clerk-react";
-import { useForm, useWatch, Control } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
+import type { Control } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
@@ -54,9 +55,6 @@ const mentorSchema = z.object({
 
 type MentorFormData = z.infer<typeof mentorSchema>;
 
-// Live Preview Card
-// UseWatch is inside this component so only the preview re-renders
-// on each keystroke, not the entire form
 function MentorPreviewCard({ control }: { control: Control<MentorFormData> }) {
   const data = useWatch({ control });
   const [imgError, setImgError] = useState(false);
@@ -74,7 +72,6 @@ function MentorPreviewCard({ control }: { control: Control<MentorFormData> }) {
         </CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
-        {/* Profile image + name */}
         <div className="flex items-center gap-3">
           {data.profileImageUrl && !imgError ? (
             <img
@@ -101,7 +98,6 @@ function MentorPreviewCard({ control }: { control: Control<MentorFormData> }) {
           </div>
         </div>
 
-        {/* Info rows */}
         <div className="space-y-2 text-sm text-muted-foreground">
           {data.company && (
             <div className="flex items-center gap-2">
@@ -123,14 +119,12 @@ function MentorPreviewCard({ control }: { control: Control<MentorFormData> }) {
           )}
         </div>
 
-        {/* Bio */}
         {data.bio && (
           <p className="text-sm text-muted-foreground line-clamp-4 border-t pt-3">
             {data.bio}
           </p>
         )}
 
-        {/* Highlights */}
         <div className="bg-blue-50 rounded-md p-3 space-y-2 mt-auto">
           <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
             Highlights
@@ -151,7 +145,6 @@ function MentorPreviewCard({ control }: { control: Control<MentorFormData> }) {
           )}
         </div>
 
-        {/* Profession badge */}
         {data.profession && (
           <div className="flex flex-wrap gap-2">
             <span className="text-xs bg-muted px-2 py-1 rounded-full">
@@ -169,7 +162,6 @@ function MentorPreviewCard({ control }: { control: Control<MentorFormData> }) {
   );
 }
 
-// Main Page
 export default function CreateMentorPage() {
   const { getToken } = useAuth();
   const [success, setSuccess] = useState(false);
@@ -226,7 +218,6 @@ export default function CreateMentorPage() {
 
   return (
     <div className="flex gap-8 items-start">
-      {/* Form (left)*/}
       <div className="flex-1 max-w-2xl">
         <h1 className="text-3xl font-bold mb-8">Create Mentor</h1>
         <Card>
@@ -234,7 +225,7 @@ export default function CreateMentorPage() {
             <CardTitle>New Mentor</CardTitle>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" autoComplete="off">
 
               {/* Name Row */}
               <div className="grid grid-cols-2 gap-4">
@@ -242,6 +233,7 @@ export default function CreateMentorPage() {
                   <Label htmlFor="firstName">First Name *</Label>
                   <Input
                     id="firstName"
+                    autoComplete="new-password"
                     {...register("firstName")}
                     className={fieldClass(!!errors.firstName)}
                   />
@@ -255,6 +247,7 @@ export default function CreateMentorPage() {
                   <Label htmlFor="lastName">Last Name *</Label>
                   <Input
                     id="lastName"
+                    autoComplete="new-password"
                     {...register("lastName")}
                     className={fieldClass(!!errors.lastName)}
                   />
@@ -272,6 +265,7 @@ export default function CreateMentorPage() {
                 <Input
                   id="email"
                   type="email"
+                  autoComplete="new-password"
                   {...register("email")}
                   className={fieldClass(!!errors.email)}
                 />
@@ -287,6 +281,7 @@ export default function CreateMentorPage() {
                 <Label htmlFor="mentorId">Mentor ID (Clerk User ID) *</Label>
                 <Input
                   id="mentorId"
+                  autoComplete="new-password"
                   {...register("mentorId")}
                   className={fieldClass(!!errors.mentorId)}
                 />
@@ -300,7 +295,11 @@ export default function CreateMentorPage() {
               {/* Phone */}
               <div className="space-y-1">
                 <Label htmlFor="phoneNumber">Phone Number</Label>
-                <Input id="phoneNumber" {...register("phoneNumber")} />
+                <Input
+                  id="phoneNumber"
+                  autoComplete="new-password"
+                  {...register("phoneNumber")}
+                />
               </div>
 
               {/* Title */}
@@ -309,6 +308,7 @@ export default function CreateMentorPage() {
                 <Input
                   id="title"
                   placeholder="e.g. Senior Software Engineer"
+                  autoComplete="new-password"
                   {...register("title")}
                 />
               </div>
@@ -316,13 +316,21 @@ export default function CreateMentorPage() {
               {/* Profession */}
               <div className="space-y-1">
                 <Label htmlFor="profession">Profession</Label>
-                <Input id="profession" {...register("profession")} />
+                <Input
+                  id="profession"
+                  autoComplete="new-password"
+                  {...register("profession")}
+                />
               </div>
 
               {/* Company */}
               <div className="space-y-1">
                 <Label htmlFor="company">Company</Label>
-                <Input id="company" {...register("company")} />
+                <Input
+                  id="company"
+                  autoComplete="new-password"
+                  {...register("company")}
+                />
               </div>
 
               {/* Experience Years */}
@@ -332,6 +340,7 @@ export default function CreateMentorPage() {
                   id="experienceYears"
                   type="number"
                   min={0}
+                  autoComplete="new-password"
                   {...register("experienceYears")}
                   className={fieldClass(!!errors.experienceYears)}
                 />
@@ -347,6 +356,7 @@ export default function CreateMentorPage() {
                 <Label htmlFor="bio">Bio</Label>
                 <textarea
                   id="bio"
+                  autoComplete="new-password"
                   className={`w-full min-h-[100px] rounded-md border px-3 py-2 text-sm bg-background ${
                     errors.bio ? "border-destructive" : "border-input"
                   }`}
@@ -365,6 +375,7 @@ export default function CreateMentorPage() {
                 <Input
                   id="profileImageUrl"
                   placeholder="https://..."
+                  autoComplete="new-password"
                   {...register("profileImageUrl")}
                   className={fieldClass(!!errors.profileImageUrl)}
                 />
@@ -383,6 +394,7 @@ export default function CreateMentorPage() {
                   type="number"
                   min={0}
                   max={100}
+                  autoComplete="new-password"
                   {...register("positiveReviews")}
                   className={fieldClass(!!errors.positiveReviews)}
                 />
@@ -400,6 +412,7 @@ export default function CreateMentorPage() {
                   id="totalEnrollments"
                   type="number"
                   min={0}
+                  autoComplete="new-password"
                   {...register("totalEnrollments")}
                   className={fieldClass(!!errors.totalEnrollments)}
                 />
@@ -416,6 +429,7 @@ export default function CreateMentorPage() {
                 <Input
                   id="startYear"
                   placeholder="e.g. 2018"
+                  autoComplete="new-password"
                   {...register("startYear")}
                 />
               </div>
