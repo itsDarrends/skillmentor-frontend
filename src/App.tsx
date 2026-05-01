@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router";
 import Layout from "@/components/Layout";
+import ErrorBoundary from "@/components/ErrorBoundary";
 import HomePage from "@/pages/HomePage";
 import LoginPage from "@/pages/LoginPage";
 import DashboardPage from "@/pages/DashboardPage";
@@ -27,6 +28,7 @@ function RoleRedirect() {
 
 function App() {
   return (
+    <ErrorBoundary>
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Layout><HomePage /></Layout>} />
@@ -66,6 +68,7 @@ function App() {
         <Route path="*" element={<Layout><LoginPage /></Layout>} />
       </Routes>
     </BrowserRouter>
+    </ErrorBoundary>
   );
 }
 

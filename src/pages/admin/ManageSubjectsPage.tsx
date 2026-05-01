@@ -3,25 +3,22 @@ import { useAuth } from "@clerk/clerk-react";
 import { useNavigate } from "react-router";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { adminGetAllSubjects, adminDeleteSubject, adminUpdateSubject, getPublicMentors } from "@/lib/api";
-import type { Mentor } from "@/types";
-
-interface Subject {
-  id: number;
-  subjectName: string;
-  description: string;
-  courseImageUrl: string;
-  mentor: { id: number; firstName: string; lastName: string };
-}
+import {
+  adminGetAllSubjects,
+  adminDeleteSubject,
+  adminUpdateSubject,
+  getPublicMentors,
+} from "@/lib/api";
+import type { AdminSubject, Mentor } from "@/types";
 
 export default function ManageSubjectsPage() {
   const { getToken } = useAuth();
   const navigate = useNavigate();
-  const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [subjects, setSubjects] = useState<AdminSubject[]>([]);
   const [mentors, setMentors] = useState<Mentor[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<number | null>(null);
-  const [editForm, setEditForm] = useState<Partial<Subject> & { mentorId?: string }>({});
+  const [editForm, setEditForm] = useState<Partial<AdminSubject> & { mentorId?: string }>({});
   const [search, setSearch] = useState("");
 
   const fetchSubjects = async () => {
@@ -30,6 +27,8 @@ export default function ManageSubjectsPage() {
     try {
       const data = await adminGetAllSubjects(token);
       setSubjects(data);
+    } catch (err) {
+      console.error("Failed to fetch subjects", err);
     } finally {
       setLoading(false);
     }
@@ -44,11 +43,15 @@ export default function ManageSubjectsPage() {
     if (!confirm("Are you sure you want to delete this subject?")) return;
     const token = await getToken({ template: "skillmentor-auth" });
     if (!token) return;
-    await adminDeleteSubject(token, id);
-    fetchSubjects();
+    try {
+      await adminDeleteSubject(token, id);
+      fetchSubjects();
+    } catch (err) {
+      console.error("Failed to delete subject", err);
+    }
   };
 
-  const handleEdit = (subject: Subject) => {
+  const handleEdit = (subject: AdminSubject) => {
     setEditingId(subject.id);
     setEditForm({
       ...subject,
@@ -59,14 +62,18 @@ export default function ManageSubjectsPage() {
   const handleUpdate = async () => {
     const token = await getToken({ template: "skillmentor-auth" });
     if (!token || !editingId) return;
-    await adminUpdateSubject(token, editingId, {
-      subjectName: editForm.subjectName,
-      description: editForm.description,
-      courseImageUrl: editForm.courseImageUrl,
-      mentorId: editForm.mentorId,
-    });
-    setEditingId(null);
-    fetchSubjects();
+    try {
+      await adminUpdateSubject(token, editingId, {
+        subjectName: editForm.subjectName,
+        description: editForm.description,
+        courseImageUrl: editForm.courseImageUrl,
+        mentorId: editForm.mentorId,
+      });
+      setEditingId(null);
+      fetchSubjects();
+    } catch (err) {
+      console.error("Failed to update subject", err);
+    }
   };
 
   const filtered = subjects.filter((s) =>
@@ -77,14 +84,18 @@ export default function ManageSubjectsPage() {
     <div>
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-3xl font-bold">Manage Subjects</h1>
-        <Button onClick={() => navigate("/admin/subjects/create")}>+ Create Subject</Button>
+        <Button onClick={() => navigate("/admin/subjects/create")}>
+          + Create Subject
+        </Button>
       </div>
+
       <Input
         placeholder="Search by subject name..."
         value={search}
         onChange={(e) => setSearch(e.target.value)}
         className="max-w-xs mb-6"
       />
+
       {loading ? (
         <p className="text-muted-foreground">Loading subjects...</p>
       ) : filtered.length === 0 ? (
@@ -109,22 +120,33 @@ export default function ManageSubjectsPage() {
                     <td className="px-4 py-3">
                       <Input
                         value={editForm.subjectName ?? ""}
-                        onChange={(e) => setEditForm({ ...editForm, subjectName: e.target.value })}
+                        onChange={(e) =>
+                          setEditForm({
+                            ...editForm,
+                            subjectName: e.target.value,
+                          })
+                        }
                         className="h-7 text-xs w-48"
                       />
                     </td>
                     <td className="px-4 py-3">
                       <Input
                         value={editForm.description ?? ""}
-                        onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+                        onChange={(e) =>
+                          setEditForm({
+                            ...editForm,
+                            description: e.target.value,
+                          })
+                        }
                         className="h-7 text-xs w-48"
                       />
                     </td>
-                    {/*edit mentor dropdown*/}
                     <td className="px-4 py-3">
                       <select
                         value={editForm.mentorId ?? ""}
-                        onChange={(e) => setEditForm({ ...editForm, mentorId: e.target.value })}
+                        onChange={(e) =>
+                          setEditForm({ ...editForm, mentorId: e.target.value })
+                        }
                         className="rounded-md border border-input bg-background px-2 py-1 text-xs w-40"
                       >
                         <option value="">Select mentor...</option>
@@ -156,10 +178,15 @@ export default function ManageSubjectsPage() {
                     </td>
                   </tr>
                 ) : (
-                  <tr key={subject.id} className="bg-background hover:bg-muted/50">
+                  <tr
+                    key={subject.id}
+                    className="bg-background hover:bg-muted/50"
+                  >
                     <td className="px-4 py-3">{subject.id}</td>
                     <td className="px-4 py-3">{subject.subjectName}</td>
-                    <td className="px-4 py-3 max-w-xs truncate">{subject.description ?? "—"}</td>
+                    <td className="px-4 py-3 max-w-xs truncate">
+                      {subject.description ?? "—"}
+                    </td>
                     <td className="px-4 py-3">
                       {subject.mentor?.firstName} {subject.mentor?.lastName}
                     </td>

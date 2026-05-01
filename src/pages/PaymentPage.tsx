@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/card";
 import { useToast } from "@/components/hooks/use-toast";
 import { useAuth } from "@clerk/clerk-react";
-import { enrollInSession } from "@/lib/api";
+import { enrollInSession, uploadPaymentSlip } from "@/lib/api";
 import { AlertCircle } from "lucide-react";
 
 export default function PaymentPage() {
@@ -47,12 +47,14 @@ export default function PaymentPage() {
       const token = await getToken({ template: "skillmentor-auth" });
       if (!token) throw new Error("Not authenticated");
 
-      await enrollInSession(token, {
+      const enrollment = await enrollInSession(token, {
         mentorId: Number(mentorId),
         subjectId: Number(subjectId),
         sessionAt: date,
         durationMinutes: 60,
       });
+
+      await uploadPaymentSlip(token, enrollment.id, file);
 
       toast({
         title: "Payment Confirmed",

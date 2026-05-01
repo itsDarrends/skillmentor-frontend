@@ -3,15 +3,8 @@ import { useAuth } from "@clerk/clerk-react";
 import { adminGetStats } from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, BookOpen, GraduationCap, BarChart3, Clock, CheckCircle } from "lucide-react";
+import type { Stats } from "@/types";
 
-interface Stats {
-  totalMentors: number;
-  totalStudents: number;
-  totalSubjects: number;
-  totalSessions: number;
-  pendingSessions: number;
-  completedSessions: number;
-}
 
 export default function StatsPage() {
   const { getToken } = useAuth();

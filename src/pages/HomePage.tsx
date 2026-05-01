@@ -10,13 +10,34 @@ export default function HomePage() {
   const { isSignedIn } = useAuth();
   const [mentors, setMentors] = useState<Mentor[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [page, setPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
-    getPublicMentors()
-      .then((data) => setMentors(data.content))
+    getPublicMentors(0)
+      .then((data) => {
+        setMentors(data.content);
+        setTotalPages(data.totalPages);
+      })
       .catch(console.error)
       .finally(() => setLoading(false));
   }, []);
+
+  const handleLoadMore = async () => {
+    const nextPage = page + 1;
+    setLoadingMore(true);
+    try {
+      const data = await getPublicMentors(nextPage);
+      setMentors((prev) => [...prev, ...data.content]);
+      setPage(nextPage);
+      setTotalPages(data.totalPages);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoadingMore(false);
+    }
+  };
 
   return (
     <div className="py-10">
@@ -61,11 +82,24 @@ export default function HomePage() {
             No mentors available yet.
           </div>
         ) : (
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {mentors.map((mentor) => (
-              <MentorCard key={mentor.id} mentor={mentor} />
-            ))}
-          </div>
+          <>
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {mentors.map((mentor) => (
+                <MentorCard key={mentor.id} mentor={mentor} />
+              ))}
+            </div>
+            {page < totalPages - 1 && (
+              <div className="flex justify-center pt-4">
+                <Button
+                  variant="outline"
+                  onClick={handleLoadMore}
+                  disabled={loadingMore}
+                >
+                  {loadingMore ? "Loading..." : "Load More"}
+                </Button>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>

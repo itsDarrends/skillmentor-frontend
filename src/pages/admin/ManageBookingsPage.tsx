@@ -8,19 +8,7 @@ import {
   adminUpdateMeetingLink,
 } from "@/lib/api";
 import { ChevronUp, ChevronDown, ChevronsUpDown } from "lucide-react";
-
-interface AdminSession {
-  id: number;
-  studentName: string;
-  studentEmail: string;
-  mentorName: string;
-  subjectName: string;
-  sessionAt: string;
-  durationMinutes: number;
-  sessionStatus: string;
-  paymentStatus: string;
-  meetingLink: string | null;
-}
+import type { AdminSession } from "@/types";
 
 type SortField = "id" | "studentName" | "mentorName" | "sessionAt" | "paymentStatus" | "sessionStatus";
 type SortDirection = "asc" | "desc" | null;

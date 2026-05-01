@@ -3,16 +3,7 @@ import { useAuth } from "@clerk/clerk-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { adminGetAllStudents, adminDeleteStudent } from "@/lib/api";
-
-interface Student {
-  id: number;
-  studentId: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  learningGoals: string;
-  createdAt: string;
-}
+import type { Student } from "@/types";
 
 export default function ManageStudentsPage() {
   const { getToken } = useAuth();
